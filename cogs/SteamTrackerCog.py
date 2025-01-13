@@ -3,9 +3,11 @@ import pytz
 import os
 import discord
 import requests
+from dotenv import load_dotenv 
 from datetime import datetime
 from discord.ext import commands, tasks
 
+load_dotenv()
 TRACK_LIST_PRICE_CHECK_TIME = [(2, 0)]
 
 class SteamTrackerCog(commands.Cog):
@@ -99,7 +101,7 @@ class SteamTrackerCog(commands.Cog):
     @commands.command(name='untrack')
     async def untrack_game(self, ctx, app_id: int, game_name: str):
         """取消追蹤 Steam 遊戲"""
-        if app_id in self.tracked_games or game_name in self.tracked_games:
+        if app_id in self.tracked_games:
             del self.tracked_games[(app_id, game_name)]
             self.save_tracked_games()
             await ctx.send(f"已取消追蹤遊戲: {game_name}")
@@ -123,7 +125,7 @@ class SteamTrackerCog(commands.Cog):
                 name=game_info['name'],
                 value=f"遊戲ID: {app_id}\n\
                         目標價格: NT${game_info['alert_price']}\n\
-                        當前價格: NT${self.current_price(app_id)/100 if self.current_price(app_id) != 'N/A' else 'N/A'}",
+                        當前價格: NT${self.current_price(app_id)//100 if self.current_price(app_id) != 'N/A' else 'N/A'}",
                 inline=False
             )
             if 'header_image' in game_info:
@@ -132,13 +134,13 @@ class SteamTrackerCog(commands.Cog):
         await ctx.send(embed=embed)
 
     @tasks.loop(minutes=1)
-    async def price_check(self, ctx):
+    async def price_check(self):
         now = datetime.now(pytz.timezone('Asia/Taipei'))
         current_time = (now.hour, now.minute)   
 
         if current_time in TRACK_LIST_PRICE_CHECK_TIME:
-            channel = self.bot.get_channel(1326384288496750593)
-            role = discord.utils.get(channel.guild.roles, id=1326407225312546898)
+            channel = self.bot.get_channel(int(os.getenv('STEAM_CHANNEL_ID')))
+            role = discord.utils.get(channel.guild.roles, id=int(os.getenv('STEAM_ROLE_ID')))
             if channel and role:
                 try:
                     for app_id, game_info in self.tracked_games.items():
@@ -146,7 +148,7 @@ class SteamTrackerCog(commands.Cog):
                         if current_price != 'N/A' and int(current_price) <= int(game_info['alert_price']):
                             embed = discord.Embed(
                                 title=f"{game_info['name']} 已達到目標價格!",
-                                description=f"當前價格: NT${current_price/100}",
+                                description=f"當前價格: NT${current_price//100}",
                                 color=discord.Color.red()
                             )
                             embed.set_image(url=game_info['header_image'])

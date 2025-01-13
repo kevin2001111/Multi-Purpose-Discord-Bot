@@ -2,8 +2,10 @@ import discord
 import pytz
 import os
 from datetime import datetime
+from dotenv import load_dotenv
 from discord.ext import commands, tasks
 
+load_dotenv()
 NOTIFICATION_TIMES_163 = [
     (7, 0), (11, 0), (15, 0), 
     (19, 0), (23, 0), (3, 0), 
@@ -28,8 +30,8 @@ class ElsworldNotificationsCog(commands.Cog):
         current_time = (now.hour, now.minute)
         
         if current_time in NOTIFICATION_TIMES_163:
-            channel = self.bot.get_channel(1326555585352827021)
-            role = discord.utils.get(channel.guild.roles, id=1326555643531886684)
+            channel = self.bot.get_channel(int(os.getenv('ELSWORLD_CHANNEL_ID')))
+            role = discord.utils.get(channel.guild.roles, id=int(os.getenv('ELSWORLD_ROLE_ID')))
             
             if channel and role:
                 try:
@@ -57,8 +59,8 @@ class ElsworldNotificationsCog(commands.Cog):
         current_time = (now.hour, now.minute)
         
         if current_time in NOTIFICATION_TIMES_194:
-            channel = self.bot.get_channel(1326555585352827021)
-            role = discord.utils.get(channel.guild.roles, id=1326555643531886684)
+            channel = self.bot.get_channel(int(os.getenv('ELSWORLD_CHANNEL_ID')))
+            role = discord.utils.get(channel.guild.roles, id=int(os.getenv('ELSWORLD_ROLE_ID')))
             
             if channel and role:
                 try:
