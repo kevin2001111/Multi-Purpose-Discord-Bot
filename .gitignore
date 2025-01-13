@@ -1,0 +1,15 @@
+# __ENV__/
+*env
+
+# ____pycache__/
+cogs/__pycache__/*.py[cod]
+__pycache__/*.py[cod]
+
+# __PIC__/
+cogs/163.png
+cogs/194.png
+
+# __Track Game__/
+cogs/tracked_games.json
+
+main.py
