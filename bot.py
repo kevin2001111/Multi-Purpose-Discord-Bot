@@ -2,7 +2,11 @@ import discord
 import os
 import asyncio
 import pytz
+import signal
+from dotenv import load_dotenv
 from discord.ext import commands
+
+load_dotenv()
 
 # Basic bot setup
 intents = discord.Intents.default()
@@ -121,7 +125,19 @@ async def load_extensions():
 async def main():
     async with bot:
         await load_extensions()
-        await bot.start("MTMyNjExMzUwNTE5MTAwMjE2NA.G1Kjd4.-VKhvm_JNMf4puMrPm56ACjNsN9D88XlNl7Sn4")
+        await bot.start(os.getenv("DISCORD_TOKEN"))
+
+def shutdown():
+    asyncio.create_task(bot.close())
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    loop = asyncio.get_event_loop()
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        loop.add_signal_handler(sig, shutdown)
+    try:
+        loop.run_until_complete(main())
+    except KeyboardInterrupt:
+        print("Bot interrupted by user")
+    finally:
+        loop.run_until_complete(bot.close())
+        loop.close()
