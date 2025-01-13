@@ -47,10 +47,10 @@ async def on_message(message):
         embed.add_field(
             name="<:Steam:1327469891782967347> Steam 指令",
             value="""
-            `$$steam search <遊戲名稱>` - 搜尋 Steam 遊戲
-            `$$steam track <遊戲ID> <期望價格>` - 追蹤遊戲價格
-            `$$steam untrack <遊戲ID>` - 取消追蹤遊戲
-            `$$steam list` - 列出追蹤清單
+            `$$search <遊戲名稱>` - 搜尋 Steam 遊戲
+            `$$track <遊戲ID> <期望價格>` - 追蹤遊戲價格
+            `$$untrack <遊戲ID>` - 取消追蹤遊戲
+            `$$list` - 列出追蹤清單
             """,
             inline=False
         )
