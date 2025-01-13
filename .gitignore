@@ -12,4 +12,7 @@ cogs/194.png
 # __Track Game__/
 cogs/tracked_games.json
 
+# __steam files__/
+steam/
+
 main.py

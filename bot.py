@@ -51,6 +51,7 @@ async def on_message(message):
             `$$track <遊戲ID> <期望價格>` - 追蹤遊戲價格
             `$$untrack <遊戲ID>` - 取消追蹤遊戲
             `$$list` - 列出追蹤清單
+            `$$connect <SteamID>` - 連結 Steam ID
             """,
             inline=False
         )
