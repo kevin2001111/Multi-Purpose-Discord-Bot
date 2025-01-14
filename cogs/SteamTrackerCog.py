@@ -4,15 +4,12 @@ import os
 import discord
 import requests
 import aiohttp
-from typing import Dict
-from steam_web_api import Steam
 from dotenv import load_dotenv 
 from datetime import datetime
 from discord.ext import commands, tasks
-from bs4 import BeautifulSoup
 
 load_dotenv()
-TRACK_LIST_PRICE_CHECK_TIME = [(2, 0), (23, 50)]
+TRACK_LIST_PRICE_CHECK_TIME = [(2, 0)]
 
 class SteamTrackerCog(commands.Cog):
     def __init__(self, bot):
