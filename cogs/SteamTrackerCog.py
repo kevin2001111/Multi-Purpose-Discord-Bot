@@ -272,6 +272,9 @@ class SteamTrackerCog(commands.Cog):
                 async with session.post(url, json=body) as response:
                     if response.status == 200:
                         data = await response.json()
+                        if data == []:
+                            await ctx.send(f"Failed to retrieve historical price for {game_info['name']}.")
+                            continue
                         game_info['historical_price'] = data[0]['lows'][0]['price']['amount']
                         game_info['currency'] = data[0]['lows'][0]['price']['currency']
                     else:
