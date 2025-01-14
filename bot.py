@@ -2,6 +2,7 @@ import discord
 import os
 import asyncio
 import pytz
+import sys
 from dotenv import load_dotenv
 from discord.ext import commands
 
@@ -12,6 +13,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.voice_states = True
 intents.guilds = True
+intents.members = True
 
 bot = commands.Bot(command_prefix='$$', intents=intents)
 bot.timezone = pytz.timezone('Asia/Taipei')
@@ -48,10 +50,9 @@ async def on_message(message):
             name="<:Steam:1327469891782967347> Steam 指令",
             value="""
             `$$search <遊戲名稱>` - 搜尋 Steam 遊戲
-            `$$track <遊戲ID> <期望價格>` - 追蹤遊戲價格
-            `$$untrack <遊戲ID>` - 取消追蹤遊戲
-            `$$list` - 列出追蹤清單
-            `$$connect <SteamID>` - 連結 Steam ID
+            `$$connect <Steam ID>` - 連結 Steam ID
+            `$$create - 建立願望清單
+            `$$list` - 列出願望清單(前5個)
             """,
             inline=False
         )
@@ -111,6 +112,11 @@ async def reload(ctx, extension):
     except Exception as e:
         await ctx.send(f"Error reloading {extension}: {str(e)}")
 
+@bot.command()
+@commands.is_owner()
+async def shutdown(ctx):
+    await ctx.send("Shutdown...")
+    await bot.close()
 
 # 一開始bot開機需載入全部程式檔案
 async def load_extensions():
