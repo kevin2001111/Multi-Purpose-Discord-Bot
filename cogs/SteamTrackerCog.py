@@ -85,6 +85,18 @@ class SteamTrackerCog(commands.Cog):
         response = self.session.get(url, params=params)
         return response.json() if response.status_code == 200 else None
 
+    def get_game_name(self, app_id: int) -> str:
+        """根據 app_id 獲取遊戲名稱"""
+        details = self.get_game_details(app_id)
+        if details and str(app_id) in details and details[str(app_id)]['success']:
+            game_info = details[str(app_id)]['data']
+            return game_info['name']
+        return "Unknown Game"
+
+    def convert_unix_timestamp(self, timestamp: int) -> str:
+        """將 Unix 時間戳轉換為可讀格式"""
+        return datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d')
+    
     @commands.command(name='search')
     async def search_steam(self, ctx, *, query):
         """搜尋 Steam 遊戲"""
@@ -111,6 +123,10 @@ class SteamTrackerCog(commands.Cog):
     async def track_game(self, ctx, app_id: int, alert_price: str):
         """追蹤 Steam 遊戲"""
         user_id = str(ctx.author.id)
+        if user_id in self.tracked_games and app_id in self.tracked_games[user_id]:
+            await ctx.send(f"該遊戲已在追蹤清單中: {self.tracked_games[user_id][app_id]['name']}")
+            return
+
         details = self.get_game_details(app_id)
         if details and str(app_id) in details and details[str(app_id)]['success']:
             game_info = details[str(app_id)]['data']
@@ -142,13 +158,6 @@ class SteamTrackerCog(commands.Cog):
     async def list(self, ctx):
         """顯示追蹤的遊戲清單"""
         user_id = str(ctx.author.id)
-        steam = Steam(os.getenv('STEAM_WEB_API_KEY'))
-        # 76561198212491913 76561198294564538 76561198399257767
-        # wishlist = await self.get_steam_wishlist("76561198399257767")
-        # print(wishlist)
-        # print(steam.users.search_user("fish900809"))
-        user = steam.users.get_profile_wishlist("76561198294564538")
-        print(user)
         if user_id not in self.tracked_games or not self.tracked_games[user_id]:
             await ctx.send("目前沒有追蹤任何遊戲!")
             return
@@ -158,7 +167,7 @@ class SteamTrackerCog(commands.Cog):
             description="",
             color=discord.Color.green()
         )
-        for app_id, game_info in self.tracked_games[user_id].items():
+        for app_id, game_info in list(self.tracked_games[user_id].items())[:10]:  # 只顯示前10筆
             embed.add_field(
                 name=game_info['name'],
                 value=f"遊戲ID: {app_id}\n\
@@ -166,10 +175,43 @@ class SteamTrackerCog(commands.Cog):
                         當前價格: NT$ {self.current_price(app_id)//100 if self.current_price(app_id) != 'N/A' else 'N/A'}",
                 inline=False
             )
-            if 'header_image' in game_info:
-                embed.set_image(url=game_info['header_image'])
-
         await ctx.send(embed=embed)
+    
+    @commands.command(name='update')
+    async def update_wishlist(self, ctx):
+        """更新 Steam 願望清單"""
+        user_id = str(ctx.author.id)
+        if user_id not in self.dcid_connect_steamid:
+            await ctx.send("請先連結 Steam ID!")
+            return
+        steam_id = self.dcid_connect_steamid[user_id]
+        url = f"https://api.steampowered.com/IWishlistService/GetWishlist/v1/?access_token={os.getenv('STEAM_ACCESS_TOKEN')}&steamid={str(steam_id)}"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    total_items = len(data['response']['items'])
+                    message = await ctx.send(f"正在更新 Steam 願望清單... 0/{total_items}")
+                    if user_id not in self.tracked_games:
+                        self.tracked_games[user_id] = {}
+                    for index, item in enumerate(data['response']['items'], start=1):
+                        if str(item['appid']) in self.tracked_games[user_id]:
+                            await message.edit(content=f"正在更新 Steam 願望清單... {index}/{total_items}")
+                            continue
+                        details = self.get_game_details(item['appid'])
+                        if details and str(item['appid']) in details and details[str(item['appid'])]['success']:
+                            game_info = details[str(item['appid'])]['data']
+                            self.tracked_games[user_id][item['appid']] = {
+                                'name': game_info['name'],
+                                'alert_price': '0',
+                                'header_image': game_info['header_image'],
+                                'date_added': self.convert_unix_timestamp(item['date_added'])
+                            }
+                        await message.edit(content=f"正在更新 Steam 願望清單... {index}/{total_items}")
+                    self.save_tracked_games()
+                else:
+                    await ctx.send("Failed to retrieve wishlist from Steam API.")
+        await ctx.send("已更新 Steam 願望清單!")
 
     @commands.command(name='connect')
     async def connect(self, ctx, steam_id: str):
@@ -178,6 +220,65 @@ class SteamTrackerCog(commands.Cog):
         self.dcid_connect_steamid[user_id] = steam_id
         self.save_dcid_connect_steamid_json()
         await ctx.send(f"已順利連結")
+
+    @commands.command(name='buildlist')
+    @commands.is_owner() 
+    async def buildlist(self, ctx):
+        url = f"https://api.steampowered.com/ISteamApps/GetAppList/v2/?access_token={os.getenv('STEAM_ACCESS_TOKEN')}"
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    with open(r'steam\steam_app_list.json', 'w', encoding='utf-8') as f:
+                        json.dump(data, f, ensure_ascii=False, indent=2)
+                    await ctx.send("Successfully retrieved and saved app list from Steam API.")
+                else:
+                    await ctx.send("Failed to retrieve app list from Steam API.")
+
+    @commands.command(name='rebuildlist')
+    @commands.is_owner() 
+    async def rebuildlist(self, ctx):
+        user_id = str(ctx.author.id)
+        if user_id not in self.tracked_games:
+            await ctx.send("No games to rebuild.")
+            return
+        for app_id, game_info in self.tracked_games[user_id].items():
+            url = f"https://api.isthereanydeal.com/games/lookup/v1?key={os.getenv('ISTHEREANYDEAL_API_KEY')}&appid={app_id}"
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        del game_info['alert_price']
+                        game_info['isthereanydeal_id'] = data['game']['id']
+                    else:
+                        await ctx.send("Failed to retrieve app list from Steam API.")
+                        break
+        self.save_tracked_games()
+        print("Rebuilt tracked games list.")
+
+    @commands.command(name='historical')
+    @commands.is_owner()
+    async def historical_price(self, ctx):
+        user_id = str(ctx.author.id)
+        if user_id not in self.tracked_games:
+            await ctx.send("No games to retrieve historical prices.")
+            return
+        total_games = len(self.tracked_games[user_id])
+        message = await ctx.send(f"Retrieving historical prices... 0/{total_games}")
+        for index, (app_id, game_info) in enumerate(self.tracked_games[user_id].items(), start=1):
+            url = f"https://api.isthereanydeal.com/games/storelow/v2?shops=61&key={os.getenv('ISTHEREANYDEAL_API_KEY')}"
+            body = [game_info['isthereanydeal_id']]
+            async with aiohttp.ClientSession() as session:
+                async with session.post(url, json=body) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        game_info['historical_price'] = data[0]['lows'][0]['price']['amount']
+                        game_info['currency'] = data[0]['lows'][0]['price']['currency']
+                    else:
+                        await ctx.send(f"Failed to retrieve historical price for {game_info['name']}.")
+            await message.edit(content=f"Retrieving historical prices... {index}/{total_games}")
+        self.save_tracked_games()
+        await ctx.send("Historical prices retrieved and updated.")
 
     @tasks.loop(minutes=1)
     async def price_check(self):
