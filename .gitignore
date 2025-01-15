@@ -6,8 +6,8 @@ cogs/__pycache__/*.py[cod]
 __pycache__/*.py[cod]
 
 # __PIC__/
-# cogs/163.png
-# cogs/194.png
+cogs/163.png
+cogs/194.png
 
 # __steam files__/
 steam/
