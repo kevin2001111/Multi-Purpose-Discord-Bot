@@ -15,6 +15,7 @@ A feature-rich Discord bot combining music playback, game tracking, and notifica
 
 ### 🎵 Music Commands
 - `$$play <song>`: Play a song from YouTube
+- `$$playlist <playlist url>`: Play the playlist from YouTube
 - `$$pause`: Pause current playback 
 - `$$resume`: Resume playback
 - `$$skip`: Skip current song
