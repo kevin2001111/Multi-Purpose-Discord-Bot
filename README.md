@@ -51,8 +51,8 @@ A feature-rich Discord bot combining music playback, game tracking, and notifica
 
 1. Clone the repository
 ```bash
-git clone https://github.com/yourusername/discord-bot.git
-cd discord-bot
+git clone [https://github.com/yourusername/discord-bot.git](https://github.com/kevin2001111/DC_BOT.git)
+cd DC_BOT
 ```
 
 2. Install dependencies
@@ -75,7 +75,6 @@ python bot.py
 ## ⚙️ Configuration
 
 The bot uses the following configuration files:
-- `config.json`: General bot settings
 - `steam/tracked_games.json`: Steam wishlist tracking
 - `steam/dcid_connect_steamid.json`: Discord-Steam ID mappings
 
