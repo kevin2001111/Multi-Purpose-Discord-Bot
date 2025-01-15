@@ -6,13 +6,8 @@ cogs/__pycache__/*.py[cod]
 __pycache__/*.py[cod]
 
 # __PIC__/
-cogs/163.png
-cogs/194.png
-
-# __Track Game__/
-cogs/tracked_games.json
+# cogs/163.png
+# cogs/194.png
 
 # __steam files__/
 steam/
-
-main.py
