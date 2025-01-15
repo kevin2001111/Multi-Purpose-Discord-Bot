@@ -26,20 +26,20 @@ class MusicCog(commands.Cog):
             'no_warnings': True,
             'default_search': 'auto',
             'source_address': '0.0.0.0',
-            'ffmpeg_location': "C:\\ffmpeg-master-latest-win64-gpl\\bin\\ffmpeg.exe",
+            'ffmpeg_location': "C:\\Users\kevintsai\\Desktop\\ffmpeg-2025-01-13-git-851a84650e-full_build\\bin",
         }
 
     async def play_next(self, ctx):
         if len(self.music_queue) > 0:
             self.is_playing = True
             self.current_song = self.music_queue.popleft()
-
             try:
                 ctx.voice_client.play(
                     discord.FFmpegPCMAudio(
                         self.current_song['url'],
-                        executable="C:\\ffmpeg-master-latest-win64-gpl\\bin\\ffmpeg.exe",
-                        before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5"
+                        executable="C:\\Users\\kevintsai\\Desktop\\ffmpeg-2025-01-13-git-851a84650e-full_build\\bin\\ffmpeg.exe",
+                        before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+                        options="-vn"
                     ),
                     after=lambda e: asyncio.run_coroutine_threadsafe(self.play_next(ctx), self.bot.loop)
                 )
