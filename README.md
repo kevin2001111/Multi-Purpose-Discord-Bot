@@ -52,7 +52,7 @@ A feature-rich Discord bot combining music playback, game tracking, and notifica
 
 1. Clone the repository
 ```bash
-git clone [https://github.com/yourusername/discord-bot.git](https://github.com/kevin2001111/DC_BOT.git)
+git clone https://github.com/kevin2001111/DC_BOT.git
 cd DC_BOT
 ```
 
