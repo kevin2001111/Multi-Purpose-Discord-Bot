@@ -2,7 +2,6 @@ import discord
 import os
 import asyncio
 import pytz
-import sys
 from dotenv import load_dotenv
 from discord.ext import commands
 
@@ -86,7 +85,7 @@ async def on_ready():
 @commands.is_owner() 
 async def load(ctx, extension):
     try:
-        bot.load_extension(f"cogs.{extension}")
+        await bot.load_extension(f"cogs.{extension}")
         await ctx.send(f"Loaded {extension} done.")
     except Exception as e:
         await ctx.send(f"Error loading {extension}: {str(e)}")
@@ -96,7 +95,7 @@ async def load(ctx, extension):
 @commands.is_owner() 
 async def unload(ctx, extension):
     try:
-        bot.unload_extension(f"cogs.{extension}")
+        await bot.unload_extension(f"cogs.{extension}")
         await ctx.send(f"Unloaded {extension} done.")
     except Exception as e:
         await ctx.send(f"Error unloading {extension}: {str(e)}")
@@ -107,7 +106,7 @@ async def unload(ctx, extension):
 @commands.is_owner() 
 async def reload(ctx, extension):
     try:
-        bot.reload_extension(f"cogs.{extension}")
+        await bot.reload_extension(f"cogs.{extension}")
         await ctx.send(f"Reloaded {extension} done.")
     except Exception as e:
         await ctx.send(f"Error reloading {extension}: {str(e)}")
@@ -123,7 +122,7 @@ async def load_extensions():
     for filename in os.listdir("./cogs"):
         if filename.endswith(".py") and filename != "r6.py":
             try:
-                bot.load_extension(f"cogs.{filename[:-3]}")
+                await bot.load_extension(f"cogs.{filename[:-3]}")
                 print(f"Loaded {filename[:-3]}")
             except Exception as e:
                 print(f"Failed to load {filename[:-3]}: {str(e)}")

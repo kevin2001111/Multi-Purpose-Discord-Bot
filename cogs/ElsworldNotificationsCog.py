@@ -91,5 +91,5 @@ class ElsworldNotificationsCog(commands.Cog):
     async def on_ready(self):
         print(f"{self.__class__.__name__} is ready!")
 
-def setup(bot: commands.Bot):
-    bot.add_cog(ElsworldNotificationsCog(bot))
+async def setup(bot: commands.Bot):
+    await bot.add_cog(ElsworldNotificationsCog(bot))

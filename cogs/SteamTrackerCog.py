@@ -257,5 +257,5 @@ class SteamTrackerCog(commands.Cog):
         self.price_check.start()
         print(f"{self.__class__.__name__} is ready!")
 
-def setup(bot):
-    bot.add_cog(SteamTrackerCog(bot))
+async def setup(bot):
+    await bot.add_cog(SteamTrackerCog(bot))

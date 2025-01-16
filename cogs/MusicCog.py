@@ -299,5 +299,5 @@ class MusicCog(commands.Cog):
     async def on_ready(self):
         print(f"{self.__class__.__name__} is ready!")
 
-def setup(bot):
-    bot.add_cog(MusicCog(bot))
+async def setup(bot):
+    await bot.add_cog(MusicCog(bot))
