@@ -52,8 +52,8 @@ A feature-rich Discord bot combining music playback, game tracking, and notifica
 
 1. Clone the repository
 ```bash
-git clone https://github.com/kevin2001111/DC_BOT.git
-cd DC_BOT
+git clone https://github.com/kevin2001111/Multi-Purpose-Discord-Bot.git
+cd Multi-Purpose-Discord-Bot
 ```
 
 2. Install dependencies
