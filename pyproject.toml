@@ -15,6 +15,7 @@ pytz = "^2024.2"
 requests = "^2.32.3"
 yt-dlp = "^2025.1.15"
 poetry-plugin-export = "^1.9.0"
+pynacl = "^1.5.0"
 
 
 [build-system]
