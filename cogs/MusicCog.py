@@ -10,6 +10,7 @@ from discord.ui import View
 import re
 from itertools import islice
 import os
+import subprocess
 
 class MusicControlView(View):
     def __init__(self, cog, ctx):
@@ -160,26 +161,40 @@ class MusicCog(commands.Cog):
             "C:\\ffmpeg\\bin\\ffmpeg.exe",
             "/usr/bin/ffmpeg",  # Linux/Replit 路徑
             "/bin/ffmpeg",      # 另一個可能的 Linux 路徑
+            "/home/runner/Discord-Bot/node_modules/ffmpeg-static/ffmpeg", # Replit 特定路徑
+            "/nix/store/*/bin/ffmpeg",  # Nix store 路徑 (Replit 使用)
             "ffmpeg"
         ]
-        for path in possible_paths:
+        
+        # 檢查是否在 Replit 環境中
+        if os.environ.get('REPL_ID') or os.environ.get('REPL_SLUG'):
+            print("檢測到 Replit 環境，將使用系統安裝的 ffmpeg")
+            # Replit 環境中，ffmpeg 會在首次使用時自動安裝，我們應該使用系統路徑
+            self.ffmpeg_path = "ffmpeg"
+        else:
+            # 非 Replit 環境，搜尋可能的路徑
             import shutil
-            if path == "ffmpeg" or os.path.exists(path):
+            for path in possible_paths:
+                # 對於通配符路徑，嘗試使用glob查找
+                if '*' in path:
+                    import glob
+                    matching_paths = glob.glob(path)
+                    if matching_paths:
+                        path = matching_paths[0]
+                        print(f"找到匹配的路徑: {path}")
+                
                 if path == "ffmpeg":
                     ffmpeg_path = shutil.which("ffmpeg")
                     if ffmpeg_path:
+                        print(f"在系統PATH中找到ffmpeg: {ffmpeg_path}")
                         self.ffmpeg_path = ffmpeg_path
                         break
-                else:
+                elif os.path.exists(path):
+                    print(f"找到ffmpeg在路徑: {path}")
                     self.ffmpeg_path = path
                     break
         
-        # 檢查是否在 Replit 環境中，如果是，則設置相應的 ffmpeg 路徑
-        if os.environ.get('REPL_ID') or os.environ.get('REPL_SLUG'):
-            print("檢測到 Replit 環境，使用系統 ffmpeg")
-            self.ffmpeg_path = "ffmpeg"  # 在 Replit 中使用系統 ffmpeg 命令
-        
-        print(f"使用的ffmpeg路徑: {self.ffmpeg_path}")
+        print(f"最終使用的ffmpeg路徑: {self.ffmpeg_path}")
         
         # YT-DLP 配置
         self.ytdl_opts = {
@@ -386,17 +401,27 @@ class MusicCog(commands.Cog):
                         'options': '-vn'
                     }
                     
-                    # 若找到ffmpeg路徑，則加入到選項
-                    if self.ffmpeg_path and self.ffmpeg_path != "ffmpeg":
-                        ffmpeg_options['executable'] = self.ffmpeg_path
-                    
-                    # Replit環境中不需要指定 executable 參數
+                    # 在 Replit 環境中使用系統安裝的 ffmpeg
                     if os.environ.get('REPL_ID') or os.environ.get('REPL_SLUG'):
+                        print("在 Replit 環境中播放音樂，使用系統 ffmpeg")
+                        # Replit 環境自動安裝的 ffmpeg，不需要指定路徑
                         if 'executable' in ffmpeg_options:
                             del ffmpeg_options['executable']
+                    elif self.ffmpeg_path and self.ffmpeg_path != "ffmpeg":
+                        ffmpeg_options['executable'] = self.ffmpeg_path
                     
                     # 創建音頻源
-                    source = discord.FFmpegPCMAudio(next_song['url'], **ffmpeg_options)
+                    try:
+                        source = discord.FFmpegPCMAudio(next_song['url'], **ffmpeg_options)
+                        print("成功創建音頻源")
+                    except Exception as e:
+                        error_msg = str(e)
+                        print(f"創建音頻源時出錯: {error_msg}")
+                        
+                        # 發送錯誤訊息到頻道
+                        if guild_id in self.player_contexts:
+                            await self.player_contexts[guild_id].send(f"播放時發生錯誤: {error_msg[:200]}")
+                        raise
                     
                     # 播放音頻
                     self.voice_clients[guild_id].play(
