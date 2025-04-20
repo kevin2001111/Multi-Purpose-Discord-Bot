@@ -486,20 +486,20 @@ class MusicCog(commands.Cog):
                 if not is_url:
                     # 搜尋模式時，先檢查搜尋結果是否為空
                     search_result = ytdl.extract_info(f"ytsearch:{query}", download=False)
-                    if not search_result or 'entries' not in search_result or len(search_result['entries']) == 0:
+                    if not search_result or 'entries' not in search_result or not search_result['entries'] or len(search_result['entries']) == 0:
                         await searching_msg.edit(content=f'❌ 無法找到符合 "{query}" 的結果')
-                    return
+                        return
                     info = search_result['entries'][0]
-            else:
+                else:
                     # 直接URL模式
                     info = ytdl.extract_info(query, download=False)
-            
+                
             # 處理播放清單URL的情況
             if info and 'entries' in info:
                 # 這是一個播放清單
                 await searching_msg.edit(content=f'⚠️ 這似乎是一個播放清單。請使用 `$$playlist {query}` 來播放整個清單，或選擇單個視頻來播放。')
                 return
-            
+
             # 檢查info是否有效
             if not info:
                 await searching_msg.edit(content=f'❌ 無法解析該影片信息')
@@ -654,34 +654,34 @@ class MusicCog(commands.Cog):
                 video_url = f"https://www.youtube.com/watch?v={entry['id']}"
                 
                 try:
-                video_info = await asyncio.get_event_loop().run_in_executor(
-                    None,
-                        lambda: yt_dlp.YoutubeDL(self.ytdl_opts).extract_info(video_url, download=False)
-                    )
-                    
+                    video_info = await asyncio.get_event_loop().run_in_executor(
+                        None,
+                            lambda: yt_dlp.YoutubeDL(self.ytdl_opts).extract_info(video_url, download=False)
+                        )
+                        
                     if not video_info or 'url' not in video_info or 'title' not in video_info:
                         failed_songs.append(entry.get('title', f'ID: {entry.get("id", "未知")}'))
                         continue
-                
-                song = {
-                    'url': video_info['url'],
-                        'title': video_info['title'],
-                        'duration': video_info.get('duration', 0),
-                        'webpage_url': video_info.get('webpage_url', ''),
-                        'thumbnail': video_info.get('thumbnail', '')
-                    }
+                    
+                    song = {
+                        'url': video_info['url'],
+                            'title': video_info['title'],
+                            'duration': video_info.get('duration', 0),
+                            'webpage_url': video_info.get('webpage_url', ''),
+                            'thumbnail': video_info.get('thumbnail', '')
+                        }
                         
                     if guild_id not in self.queues:
                         self.queues[guild_id] = []
                             
                     self.queues[guild_id].append(song)
-                success_count += 1
+                    success_count += 1
                 
                 except Exception as inner_e:
                     print(f"處理播放清單項目時發生錯誤: {inner_e}")
                     failed_songs.append(entry.get('title', f'ID: {entry.get("id", "未知")}'))
                     continue
-                    
+                
             except Exception as e:
                 failed_songs.append(entry.get('title', f'ID: {entry.get("id", "未知")}'))
                 print(f"處理播放清單項目時發生錯誤: {e}")
@@ -713,7 +713,7 @@ class MusicCog(commands.Cog):
         """播放整個播放清單"""
         if not ctx.author.voice:
             await ctx.send('你必須加入一個語音頻道才能使用這個指令')
-                return
+            return
 
         voice_channel = ctx.author.voice.channel
         guild_id = ctx.guild.id
