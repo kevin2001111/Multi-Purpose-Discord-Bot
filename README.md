@@ -4,8 +4,7 @@
 
 ![Discord](https://img.shields.io/badge/Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)
 ![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
-![Elsword](https://img.shields.io/badge/Elsword-FF4500?style=for-the-badge&logo=game&logoColor=white)
-![Steam](https://img.shields.io/badge/Steam-000000?style=for-the-badge&logo=steam&logoColor=white)
+![Elsworld](https://img.shields.io/badge/Elsword-FF4500?style=for-the-badge&logo=game&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)
 
 </div>
@@ -23,7 +22,7 @@ Powerful music playback functionality with YouTube search and playlist support:
 - **Loop Mode**: Single track/playlist looping
 - **Auto Disconnect**: Automatically leaves voice channels after 30 minutes of inactivity, saving resources
 
-### ⏰ Elsword Game Reminders
+### ⏰ Elsworld Game Reminders
 Automated dungeon reminder system so your team never misses important dungeon times:
 
 - **Timed Notifications**: 163-Praegas Maze, 194-Steel Wall timed reminders
@@ -65,7 +64,6 @@ Modular design makes the bot easy to extend:
 - Python 3.8+
 - FFmpeg (for audio processing)
 - Discord bot token
-- Steam API key (if using Steam-related features)
 - Other optional API keys (depending on features used)
 
 ### Installation Steps
