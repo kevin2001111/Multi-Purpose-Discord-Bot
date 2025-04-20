@@ -15,8 +15,8 @@ NOTIFICATION_TIMES_194 = [
     (21, 0), (1, 0), (5, 0),
 ]
 
-_163_IMAGE_PATH = r"C:\Users\kevintsai\Desktop\DCbot\cogs\163.png"
-_194_IMAGE_PATH = r"C:\Users\kevintsai\Desktop\DCbot\cogs\194.png"
+_163_IMAGE_PATH = r"C:\Users\Kevin\Downloads\DCbot\cogs\163.png"
+_194_IMAGE_PATH = r"C:\Users\Kevin\Downloads\DCbot\cogs\194.png"
 
 class ElsworldNotificationsCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -35,14 +35,11 @@ class ElsworldNotificationsCog(commands.Cog):
             
             if channel and role:
                 try:
-                    # Create embed with dungeon information
                     embed = discord.Embed(
                         title="163-普雷加斯的迷宮",
                         description=f"{current_time[0]}:{current_time[1]}0囉！該打163了！",
                         color=discord.Color.gold()
                     )
-                    
-                    # Add image if it exists
                     if os.path.exists(_163_IMAGE_PATH):
                         file = discord.File(_163_IMAGE_PATH, filename="163.png")
                         embed.set_image(url="attachment://163.png")
@@ -64,14 +61,11 @@ class ElsworldNotificationsCog(commands.Cog):
             
             if channel and role:
                 try:
-                    # Create embed with dungeon information
                     embed = discord.Embed(
-                        title="194-普雷加斯的迷宮",
+                        title="194-鋼鐵城壁",
                         description=f"{current_time[0]}:{current_time[1]}0囉！該打194了！",
                         color=discord.Color.gold()
                     )
-                    
-                    # Add image if it exists
                     if os.path.exists(_194_IMAGE_PATH):
                         file = discord.File(_194_IMAGE_PATH, filename="194.png")
                         embed.set_image(url="attachment://194.png")
