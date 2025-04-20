@@ -158,6 +158,8 @@ class MusicCog(commands.Cog):
         possible_paths = [
             "C:\\Users\\Kevin\\Downloads\\ffmpeg-2025-01-13-git-851a84650e-full_build\\bin\\ffmpeg.exe",
             "C:\\ffmpeg\\bin\\ffmpeg.exe",
+            "/usr/bin/ffmpeg",  # Linux/Replit 路徑
+            "/bin/ffmpeg",      # 另一個可能的 Linux 路徑
             "ffmpeg"
         ]
         for path in possible_paths:
@@ -171,6 +173,11 @@ class MusicCog(commands.Cog):
                 else:
                     self.ffmpeg_path = path
                     break
+        
+        # 檢查是否在 Replit 環境中，如果是，則設置相應的 ffmpeg 路徑
+        if os.environ.get('REPL_ID') or os.environ.get('REPL_SLUG'):
+            print("檢測到 Replit 環境，使用系統 ffmpeg")
+            self.ffmpeg_path = "ffmpeg"  # 在 Replit 中使用系統 ffmpeg 命令
         
         print(f"使用的ffmpeg路徑: {self.ffmpeg_path}")
         
@@ -380,8 +387,13 @@ class MusicCog(commands.Cog):
                     }
                     
                     # 若找到ffmpeg路徑，則加入到選項
-                    if self.ffmpeg_path:
+                    if self.ffmpeg_path and self.ffmpeg_path != "ffmpeg":
                         ffmpeg_options['executable'] = self.ffmpeg_path
+                    
+                    # Replit環境中不需要指定 executable 參數
+                    if os.environ.get('REPL_ID') or os.environ.get('REPL_SLUG'):
+                        if 'executable' in ffmpeg_options:
+                            del ffmpeg_options['executable']
                     
                     # 創建音頻源
                     source = discord.FFmpegPCMAudio(next_song['url'], **ffmpeg_options)
